@@ -1,1 +1,1 @@
-This is a fork of https://github.com/harbaum/make-block-reloaded
+This is a fork of https://github.com/harbaum/make-block-reloaded and uses code from: https://github.com/TacticalCode/SNESpaduino
