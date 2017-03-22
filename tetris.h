@@ -43,7 +43,7 @@
 #define SPEAKER_PIN      9
 #define SPEAKER_PIN_2   10    // second channel option
 
-#define NO_DROP              // use drop key as second rotate
+//#define NO_DROP              // use drop key as second rotate
 
 #define KEY_LEFT    0x01
 #define KEY_RIGHT   0x02
@@ -51,5 +51,6 @@
 #define KEY_DOWN    0x08
 #define KEY_DROP    0x10
 #define KEY_PAUSE   0x20    // generated from key combo
+#define KEY_SELECT  0x40    
 
 #endif // TETRIS_H

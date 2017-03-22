@@ -561,7 +561,8 @@ void loop() {
   // the following will also work when millis() wraps (after 49 days :-)
   if( (long)(next_event - millis()) > 0 ) {
     // can do background stuff here like playing music ...
-
+    //Serial.println(next_event);
+    //Serial.println(millis());
     delay(1);  // sleep a little bit
   } else {
     static uint8_t frame_cnt;
@@ -616,7 +617,7 @@ void loop() {
       
       if (keys & KEY_SELECT) {
         pause_song();
-        //config_init();
+        config_init();
         set_state(STATE_CONFIG);
       }
       break;
