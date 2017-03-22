@@ -13,6 +13,9 @@ uint8_t config_brightness;
 bool config_audio;
 bool config_key_released;
 
+extern volatile unsigned long timer0_millis;
+unsigned long new_value = 0;
+
 void config_load() {
   // load initial value from eeprom if availble
   if(EEPROM.read(10) == 0x42) {
@@ -91,17 +94,11 @@ void config_draw_menu(uint8_t sel) {
 void config_init() {
   LEDS.clear();
   LEDS.setBrightness(config_brightness);
-
   config_draw_menu(config_entry);
-  config_key_released = false;
 }
 
 uint8_t config_process(uint8_t keys) {
-  if(!keys_any_down())
-    config_key_released = true;
-
-  if(config_key_released) {
-  
+    
     if((keys & KEY_DROP) && (config_entry > 0)) {
       config_entry--;
       keys_lock();      // prevent auto repeat
@@ -145,7 +142,6 @@ uint8_t config_process(uint8_t keys) {
     
     if(keys)
       config_draw_menu(config_entry);
-  }
     
   return 0;
 }

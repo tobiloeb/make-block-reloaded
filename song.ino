@@ -9,7 +9,8 @@
 
 // Frequencies/notes required for Korobeiniki (Tetris theme):
 #define G4S FREQ2OCR(415.30)
-#define A4  FREQ2OCR(440.00)
+// Change from 440 to 435 because of buzzer problems.
+#define A4  FREQ2OCR(435.00)
 #define B4  FREQ2OCR(493.88)
 #define C5  FREQ2OCR(523.25)
 #define D5  FREQ2OCR(587.33)
@@ -60,6 +61,10 @@ const struct song_S { uint8_t ocr; uint8_t len; } song[] PROGMEM = {
 
 void song_init() {
   audio_init();
+}
+
+void pause_song() {
+  audio_set(AUDIO_OFF);
 }
 
 void song_process(int8_t speed) {

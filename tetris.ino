@@ -30,6 +30,7 @@ typedef enum { STATE_CONFIG, STATE_TITLE,
 	       STATE_GAME, STATE_SCORE, STATE_INITIALS } state_t;
 
 state_t state;
+state_t last_state;
 
 // caution: this does not check for boundaries
 void rect(int8_t x, int8_t y, uint8_t w, uint8_t h, CRGB c) {
@@ -514,11 +515,16 @@ uint8_t game_process(uint8_t keys) {
   return 0;
 }
 
+void set_state(state_t new_state) {
+  last_state = state;
+  state = new_state;
+}
+
 unsigned long next_event;
 
 void setup() {
-  //  Serial.begin(9600);
-  //  Serial.println("Tetris");
+    //Serial.begin(9600);
+    //Serial.println("Tetris");
 
   FastLED.addLeds<WS2812B, LED_DATA_PIN, GRB>(leds, NUM_LEDS);
 
@@ -532,27 +538,20 @@ void setup() {
   // load config (audio & brightness) from eeprom
   config_load();
 
-  // check if user pressed a button at startup to enter
-  // the config menu 
-  if(keys_any_down()) {
-    config_init();
-    state = STATE_CONFIG;
+  // check if there's a high score in eeprom but no name. In that case
+  // ask the user to set a name. This is for boards that previously had
+  // a firmware that wouldn't let the user set a name
+  if((EEPROM.read(0) == 0x42) && (EEPROM.read(20) != 0x42)) {
+    uint32_t hi;
+    EEPROM.get(1, hi);
+    initials_init(hi);
+    set_state(STATE_INITIALS);
   } else {
-    // check if there's a high score in eeprom but no name. In that case
-    // ask the user to set a name. This is for boards that previously had
-    // a firmware that wouldn't let the user set a name
-    if((EEPROM.read(0) == 0x42) && (EEPROM.read(20) != 0x42)) {
-      uint32_t hi;
-      EEPROM.get(1, hi);
-      initials_init(hi);
-      state = STATE_INITIALS;
-    } else {
-      // normal startup
-      title_init();
-      state = STATE_TITLE;
-    }
+    // normal startup
+    title_init();
+    set_state(STATE_TITLE);
   }
-
+  
   song_init();
 }
 
@@ -580,29 +579,45 @@ void loop() {
     switch(state) {
     case STATE_CONFIG:
       if(config_process(keys)) {
-	title_init();
-	state = STATE_TITLE;
+        if (last_state == STATE_GAME) {
+          LEDS.clear();
+          set_state(STATE_GAME);
+        } else {
+        	title_init();
+        	set_state(STATE_TITLE);
+        }
       }
       break;
 
     case STATE_TITLE:
       if(title_process(keys)) {
-	game_init();
-	state = STATE_GAME;
+      	game_init();
+      	set_state(STATE_GAME);
+      } 
+      if (keys & KEY_SELECT) {
+        pause_song();
+        config_init();
+        set_state(STATE_CONFIG);
       }
       break;
       
     case STATE_GAME:
       song_process(game_level+1);
       if(game_process(keys)) {
-	if(game_score > hi_score) {
-	  initials_init(game_score);
-	  state = STATE_INITIALS;
-	} else {
-	  score_init(game_score, game_score > hi_score);
-	  state = STATE_SCORE;
-	}
+      	if(game_score > hi_score) {
+      	  initials_init(game_score);
+      	  set_state(STATE_INITIALS);
+      	} else {
+      	  score_init(game_score, game_score > hi_score);
+      	  set_state(STATE_SCORE);
+      	}
         song_process(0);
+      }
+      
+      if (keys & KEY_SELECT) {
+        pause_song();
+        //config_init();
+        set_state(STATE_CONFIG);
       }
       break;
 
@@ -612,13 +627,13 @@ void loop() {
 	// user pressed a key -> jump directly into
 	// next game
 	game_init();
-	state = STATE_GAME;
+	set_state(STATE_GAME);
 	break;
 
       case 2:
 	// timeout, jump to title screen
 	title_init();
-	state = STATE_TITLE;
+	set_state(STATE_TITLE);
 	break;
       }
       break;
@@ -626,7 +641,7 @@ void loop() {
     case STATE_INITIALS:
       if(initials_process(keys)) {
 	title_init();
-	state = STATE_TITLE;
+	set_state(STATE_TITLE);
       }
       break;
 
