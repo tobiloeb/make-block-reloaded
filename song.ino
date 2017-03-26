@@ -9,8 +9,7 @@
 
 // Frequencies/notes required for Korobeiniki (Tetris theme):
 #define G4S FREQ2OCR(415.30)
-// Change from 440 to 435 because of buzzer problems.
-#define A4  FREQ2OCR(435.00)
+#define A4  FREQ2OCR(440.00)
 #define B4  FREQ2OCR(493.88)
 #define C5  FREQ2OCR(523.25)
 #define D5  FREQ2OCR(587.33)

@@ -37,13 +37,13 @@
 
 #define LED_PIN         13    // arduino on board led
 
-#define AUDIO_PRESCALER  64LU
+#define AUDIO_PRESCALER  128LU
 #define KEY_DOWN_PIN     8
 #define KEY_ROTATE_PIN  11    // should be connected to "fire"
 #define SPEAKER_PIN      9
 #define SPEAKER_PIN_2   10    // second channel option
 
-//#define NO_DROP              // use drop key as second rotate
+#define NO_DROP              // use drop key as second rotate
 
 #define KEY_LEFT    0x01
 #define KEY_RIGHT   0x02
