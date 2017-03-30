@@ -599,6 +599,8 @@ void loop() {
         pause_song();
         config_init();
         set_state(STATE_CONFIG);
+      } else if (keys & KEY_PAUSE) {
+        // jump to hiscore screens
       }
       break;
       
