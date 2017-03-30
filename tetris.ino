@@ -625,10 +625,9 @@ void loop() {
     case STATE_SCORE:
       switch(score_process(keys)) {
       case 1:
-	// user pressed a key -> jump directly into
-	// next game
-	game_init();
-	set_state(STATE_GAME);
+	// user pressed a key -> jump to title screen
+	title_init();
+  set_state(STATE_TITLE);
 	break;
 
       case 2:
