@@ -101,7 +101,6 @@ uint8_t keys_get(uint8_t mode) {
       }
     }
   }
-        
   return ret;
 }
 

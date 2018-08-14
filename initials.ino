@@ -77,7 +77,7 @@ void initials_init(uint32_t score) {
   initials_entry_draw();
 }
 
-uint8_t initials_process(uint8_t keys) {
+uint8_t initials_process(uint8_t keys, uint8_t score_position) {
   // some colorful animation ...
   static uint8_t coff = 0;
   initials_colorbar(INITIALS_SCORE_Y-2, coff);
@@ -132,9 +132,11 @@ uint8_t initials_process(uint8_t keys) {
       for(uint8_t i=initials_cur_chr;i<16;i++)
 	initials_str[i] = 0;
 
+      save_name_at(initials_str, score_position);
       EEPROM.write(20, 0x42);   // write magic marker
-      for(uint8_t i=0;i<15;i++)
-	EEPROM.put(21+i, initials_str[i]);
+      for(uint8_t i=0;i<15;i++) {
+	      EEPROM.put(21+i, initials_str[i]);
+      }
 
       return 1;
     }

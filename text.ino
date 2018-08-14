@@ -71,8 +71,8 @@ uint8_t text_draw_char(char chr, int8_t x, int8_t y, int8_t skip, uint8_t len, C
     if(skip > 0) skip--;
     else if(len > 0) {
       for(uint8_t b=0;b<6;b++)
-	if(pgm_read_byte(p) & (0x20>>b)) 
-	  text_draw_pixel(x, y+b-1, c);
+      	if(pgm_read_byte(p) & (0x20>>b)) 
+      	  text_draw_pixel(x, y+b-1, c);
     }
     
     len--;

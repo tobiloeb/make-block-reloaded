@@ -109,12 +109,13 @@ uint8_t config_process(uint8_t keys) {
       config_entry++;
       keys_lock();      // prevent auto repeat
     }
-    
+
     // handle menu entry
     switch(config_entry) {
     case 0:
-      if(keys & KEY_ROTATE) 
-	config_audio = !config_audio;
+      if(keys & KEY_ROTATE) {
+	      config_audio = !config_audio;
+      }
       break;
       
     case 1:
@@ -129,7 +130,7 @@ uint8_t config_process(uint8_t keys) {
     case 2:
       // "OK" -> start game
       if(keys & KEY_ROTATE) {
-	audio_on(config_audio);
+	      audio_on(config_audio);
 
 	// save config in eeprom
 	EEPROM.write(10, 0x42);   // write magic marker

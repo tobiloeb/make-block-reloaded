@@ -31,8 +31,13 @@ void title_init() {
   LEDS.clear();
   LEDS.setBrightness(config_get_brightness());
 
+  Serial.println("TITLE:");
   // check if there's a user name in eeprom
-  if(EEPROM.read(20) == 0x42) {
+  
+  uint8_t isNameSet = 0;
+
+  EEPROM.get(101, isNameSet);
+  if(isNameSet != 0) {
     uint8_t i = 0;
 
     // append the "BY " as it may have previously been removed
@@ -41,7 +46,7 @@ void title_init() {
 
     // laod max 15 bytes to byte 14 in string
     do { 
-      EEPROM.get(21+i, title_score_msg[14+i]);
+      EEPROM.get(101+i, title_score_msg[14+i]);
       i++;
     } while((i < 16) && (title_score_msg[14+i-1]));
 	 
@@ -52,9 +57,9 @@ void title_init() {
   }
 
   // load hi score
-  uint32_t hi = 0;
-  if(EEPROM.read(0) == 0x42)
-    EEPROM.get(1, hi);
+  uint32_t hi = get_score_from_position(0);
+  /*if(EEPROM.read(0) == 0x42)
+    EEPROM.get(1, hi);*/
 
   ltoa(hi, title_score_msg+strlen(title_score_msg), 10);
   title_score_len = text_str_len(title_score_msg);

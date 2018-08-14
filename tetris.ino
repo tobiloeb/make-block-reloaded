@@ -27,7 +27,7 @@ CRGB leds[NUM_LEDS];
 
 // possible game states
 typedef enum { STATE_CONFIG, STATE_TITLE, 
-	       STATE_GAME, STATE_SCORE, STATE_INITIALS } state_t;
+	       STATE_GAME, STATE_SCORE, STATE_INITIALS, STATE_HI_SCORE } state_t;
 
 state_t state;
 state_t last_state;
@@ -104,6 +104,7 @@ struct tetromino_S {
 uint8_t game_step_cnt;
 uint8_t game_level;
 uint32_t game_score;
+uint8_t game_score_position;
 uint16_t game_lines;
 uint8_t game_cont_drop;
 uint32_t hi_score;
@@ -297,14 +298,7 @@ void game_init() {
 
   // load hi score from eeprom
   // check if eeprom marker is valid
-  if(EEPROM.read(0) == 0x42)
-    EEPROM.get(1, hi_score);
-  else {
-    hi_score = 0;            // no high score yet
-    EEPROM.write(0, 0x42);   // write magic marker
-    EEPROM.put(1, hi_score); // write (clear) hi score
-  }
-
+  hi_score = get_lowest_score();
   game_show_level();
 
   // for some reason the first call to random always returns 0 ...
@@ -384,8 +378,10 @@ uint8_t game_process(uint8_t keys) {
       // game area is closed ..
 
       // update high score if necessary
-      if(game_score > hi_score)
-	EEPROM.put(1, game_score); // write new high score
+      if(game_score > hi_score) {
+	      // EEPROM.put(1, game_score);  write new high score
+        game_score_position = store_new_hiscore(game_score);
+      }
 
       return 1;
     }
@@ -526,6 +522,10 @@ void setup() {
     //Serial.begin(9600);
     //Serial.println("Tetris");
 
+  /*for (int i = 20; i < EEPROM.length() ; i++) {
+    EEPROM.write(i, 0);
+  }*/
+
   FastLED.addLeds<WS2812B, LED_DATA_PIN, GRB>(leds, NUM_LEDS);
 
   pinMode(LED_PIN, OUTPUT);     
@@ -541,9 +541,11 @@ void setup() {
   // check if there's a high score in eeprom but no name. In that case
   // ask the user to set a name. This is for boards that previously had
   // a firmware that wouldn't let the user set a name
-  if((EEPROM.read(0) == 0x42) && (EEPROM.read(20) != 0x42)) {
+  uint8_t isNameSet = 0;
+  EEPROM.get(101, isNameSet);
+  if((EEPROM.read(116) == 0x42) && (isNameSet == 0)) {
     uint32_t hi;
-    EEPROM.get(1, hi);
+    game_score_position = 0;
     initials_init(hi);
     set_state(STATE_INITIALS);
   } else {
@@ -575,7 +577,6 @@ void loop() {
     // config has a faster key repeat for left/right
     // initials has constant repeat for up/down
     uint8_t keys = keys_get((state == STATE_CONFIG)?1:(state == STATE_INITIALS)?2:0);
-
     // game state
     switch(state) {
     case STATE_CONFIG:
@@ -601,6 +602,8 @@ void loop() {
         set_state(STATE_CONFIG);
       } else if (keys & KEY_PAUSE) {
         // jump to hiscore screens
+        hiscore_init(0);
+        set_state(STATE_HI_SCORE);
       }
       break;
       
@@ -627,26 +630,32 @@ void loop() {
     case STATE_SCORE:
       switch(score_process(keys)) {
       case 1:
-	// user pressed a key -> jump to title screen
-	title_init();
-  set_state(STATE_TITLE);
-	break;
+      	// user pressed a key -> jump to title screen
+      	title_init();
+        set_state(STATE_TITLE);
+      	break;
 
       case 2:
-	// timeout, jump to title screen
-	title_init();
-	set_state(STATE_TITLE);
-	break;
+      	// timeout, jump to title screen
+      	title_init();
+      	set_state(STATE_TITLE);
+      	break;
       }
       break;
 
     case STATE_INITIALS:
-      if(initials_process(keys)) {
-	title_init();
-	set_state(STATE_TITLE);
+      if(initials_process(keys, game_score_position)) {
+      	hiscore_init(game_score_position);
+        set_state(STATE_HI_SCORE);
       }
       break;
-
+    case STATE_HI_SCORE: 
+      hiscore_process(keys);
+      if (keys & KEY_PAUSE) {
+        title_init();
+        set_state(STATE_TITLE);
+      }
+      break;
     default:
       break;
     }

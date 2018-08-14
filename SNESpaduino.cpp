@@ -41,7 +41,6 @@ uint16_t SNESpaduino::getButtons(boolean return_inverted)
 	{
 		// Read a button's state, shift it into the variable
 		state |= digitalRead(PIN_DATA) << i;
-
 		// Send a clock pulse to shift out the next bit
 		digitalWrite(PIN_CLOCK, HIGH);
 		digitalWrite(PIN_CLOCK, LOW);
